@@ -5,14 +5,12 @@ from sklearn.model_selection import train_test_split
 
 
 class Matrix_factorization(object):
-    def __init__(self, alpha=0.01, eta=0.001, K=80, users=1892, artists=17632):
+    def __init__(self, alpha=0.01, eta=0.01, K=96, users=1892, artists=17632):
         self.alpha = alpha
         self.eta = eta
         self.K = K
         self.users = users
-        self.users_avg = np.zeros(self.users)
         self.artists = artists
-        self.artists_avg = np.zeros(self.artists)
         self.init_matrices()
 
     def init_matrices(self):
@@ -20,31 +18,6 @@ class Matrix_factorization(object):
         self.P[:, 0] = np.ones(self.users)  # incorporate bias features
         self.Q = np.random.rand(self.artists, self.K) * 0.02 - 0.01
         self.Q[:, 1] = np.ones(self.artists)  # incorporate bias features
-
-    def init_averages(self, training_data):
-        users_samples = np.zeros(self.users)
-        artists_samples = np.zeros(self.artists)
-        avg = 0
-
-        for line in training_data:
-            self.users_avg[int(line[0])] += line[2]
-            users_samples[int(line[0])] += 1
-            self.artists_avg[int(line[1])] += line[2]
-            artists_samples[int(line[1])] += 1
-            avg += line[2]
-
-        avg = avg / len(training_data)
-        self.artists_avg = self.artists_avg / (artists_samples + 0.0001)
-        self.artists_avg[self.artists_avg > 10.0] = avg  # set to global average mark
-        print("total average: ", avg)
-
-        self.users_avg = self.users_avg / (users_samples + 0.0001)
-        self.users_avg[self.users_avg > 10.0] = avg  # set to global average mark
-
-    def transform_data(self, data):
-        # TODO: preurediti učne podatke
-        # nekfsd
-        print("It is not working")
 
     def __call__(self, training_data, iter=1000, testing=5):
         n = len(training_data)
@@ -81,8 +54,20 @@ class Matrix_factorization(object):
             rmse_avg += rmse
         return rmse_avg / testing
 
+    def add_new_user(self, user_data):
+        new_P_vector = np.random.rand(self.K) * 0.02 - 0.01
+        for line in user_data:
+            u = int(line[0]) - 1
+            i = int(line[1]) - 1
+            eui = (line[2] - new_P_vector.dot(self.Q[i]))
+            new_P_vector = new_P_vector + self.alpha * (eui * self.Q[i] - self.eta * new_P_vector)
+            new_P_vector[0] = 1  # incorporate bias features
+        return new_P_vector
+
     def predict(self, testing_data):
-        return np.array([self.P[int(line[0]) - 1].dot(self.Q[int(line[1]) - 1]) for line in testing_data])
+        p =  np.array([self.P[int(line[0]) - 1].dot(self.Q[int(line[1]) - 1]) for line in testing_data])
+        p[p < 0] = 0.1
+        return p
 
 
 def write_to_file(filename, text):

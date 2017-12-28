@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link href="css/jquery.flexdatalist.min.css" rel="stylesheet" type="text/css">
+	<link href="css/personal.css" rel="stylesheet" type="text/css">
+	<script language="JavaScript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/jquery.flexdatalist.min.js"></script>
+
+</head>
+
+<body style="background-color: #222;">
+
+	<div class = "main">
+	<div class = "wrapper">
+	<div style="text-align:center;">
+		<input type='text'
+		       placeholder='Write artist you want to rate'
+		       class='flexdatalist'
+		       data-data='artists.json'
+		       data-search-in='name'
+		       data-value-property='id'
+		       data-min-length='1'
+		       name='artists_name_suggestion'>
+	</div>
+	</div>
+	</div>
+</body>
+
+</html>
+<script language="JavaScript" type="text/javascript" src="js/main.js"></script>
